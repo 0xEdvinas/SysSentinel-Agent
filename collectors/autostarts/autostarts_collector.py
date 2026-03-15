@@ -1,3 +1,4 @@
+import subprocess
 import winreg
 import os
 
@@ -41,6 +42,27 @@ class AutostartsCollector:
                       'path': item_path 
                      }
                 )
+
+        return autostarts
+    
+    def get_scheduled_tasks_autostarts(self):
+        result = subprocess.run(['schtasks', '/query', '/fo', 'LIST'], capture_output=True, text=True)
+        output = result.stdout
+
+        autostarts = []
+        current_task = {}
+
+        for line in output.splitlines():
+            if line.startswith("TaskName:"):
+                if current_task:
+                    autostarts.append(current_task)
+                    current_task = {}
+                current_task['name'] = line.split(":", 1)[1].strip()
+            elif line.startswith("Task To Run:"):
+                current_task['path'] = line.split(":", 1)[1].strip()
+
+        if current_task:
+            autostarts.append(current_task)
 
         return autostarts
 
