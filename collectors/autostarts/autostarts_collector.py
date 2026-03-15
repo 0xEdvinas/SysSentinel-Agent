@@ -65,6 +65,27 @@ class AutostartsCollector:
             autostarts.append(current_task)
 
         return autostarts
+    
+    def get_windows_services_autostarts(self):
+        result = subprocess.run(['sc', 'query', 'state=all'], capture_output=True, text=True)
+        output = result.stdout
+
+        autostarts = []
+        current_service = {}
+
+        for line in output.splitlines():
+            if line.startswith("SERVICE_NAME:"):
+                if current_service:
+                    autostarts.append(current_service)
+                    current_service = {}
+                current_service['name'] = line.split(":", 1)[1].strip()
+            elif line.startswith("BINARY_PATH_NAME:"):
+                current_service['path'] = line.split(":", 1)[1].strip()
+
+        if current_service:
+            autostarts.append(current_service)
+
+        return autostarts
 
 
     
