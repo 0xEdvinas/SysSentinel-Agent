@@ -5,7 +5,6 @@ class AutostartsCollector:
     def __init__(self):
         pass
     
-
     def get_registry_autostarts(self):
       path = r"Software\Microsoft\Windows\CurrentVersion\Run"
 
@@ -18,7 +17,11 @@ class AutostartsCollector:
           try:
               # returns name, value, convention
               name, value, _ = winreg.EnumValue(key, i)
-              autostarts.append((name, value))
+              autostarts.append({ 
+                  'name': name, 
+                  'path': value 
+                 })
+              
               i += 1
           except OSError:
               break
